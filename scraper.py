@@ -158,7 +158,9 @@ def scrape_day(driver, day: str, page_size: int = 100, max_pages: int = 30) -> l
                 results[key] = entry
                 added += 1
         log.info("[%s page %d] %d rows, %d new", day, page + 1, len(data["rows"]), added)
-        if added == 0 or not data["rows"]:
+        # A short page means Yahoo has no more rows for this day; requesting the
+        # next offset would only time out on an empty table.
+        if added == 0 or len(data["rows"]) < page_size:
             break
         offset += len(data["rows"])
     return list(results.values())
